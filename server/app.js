@@ -1,18 +1,31 @@
-import express from 'express'
-import cors from 'cors'
-import cookieParser from 'cookie-parser'
-import dotenv from 'dotenv'
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server Running Successfully",
+  });
+});
 
-dotenv.config()
-const app = express()
+import authRoutes from "./routes/authRoutes.js";
+import companyRoutes from "./routes/superAdminRoutes/companyRoutes.js";
 
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(cors())
-app.use(cookieParser())
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/company", companyRoutes);
 
-app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'Server Running Successfully' })
-})
+// app.use("/api/employee", employeeRoutes);
+// Error Middleware// app.use(errorHandler);
 
-export default app
+export default app;

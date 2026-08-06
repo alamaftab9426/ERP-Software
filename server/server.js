@@ -1,19 +1,20 @@
-import app from './app.js'
-import mongoose from 'mongoose'
-import dotenv from 'dotenv'
+import dotenv from "dotenv";
+dotenv.config();
 
-dotenv.config()
-const PORT = process.env.PORT || 5000
+import connectDB from "./config/db.js";
+import app from "./app.js";
+const PORT = process.env.PORT || 5000;
 
-if (process.env.MONGO_URI) {
-  mongoose
-    .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('MongoDB connected'))
-    .catch((err) => console.warn('MongoDB connection error:', err.message))
-} else {
-  console.log('MONGO_URI not set — skipping MongoDB connection')
-}
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server");
+    console.error(error);
+  }
+};
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+startServer();
