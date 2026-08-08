@@ -6,6 +6,7 @@ const companySchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      maxlength: 100,
     },
 
     companyCode: {
@@ -30,10 +31,12 @@ const companySchema = new mongoose.Schema(
       unique: true,
     },
 
-    adminMobile: {
-      type: String,
-      required: true,
-      trim: true,
+     adminMobile: {
+     type: String,
+     required: true,
+     trim: true,
+     minlength: 10,
+     maxlength: 15,
     },
 
     subscriptionPlan: {
@@ -41,6 +44,7 @@ const companySchema = new mongoose.Schema(
       enum: ["BASIC", "PRO", "ENTERPRISE"],
       default: "BASIC",
     },
+    
 
     status: {
       type: String,
@@ -64,10 +68,14 @@ const companySchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
+   
   },
+  
   {
     timestamps: true,
   }
+  
 );
 
 const Company = mongoose.model("Company", companySchema);

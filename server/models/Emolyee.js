@@ -2,97 +2,57 @@ import mongoose from "mongoose";
 
 const employeeSchema = new mongoose.Schema(
   {
-    // Authentication User Reference
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      unique: true,
-    },
-
-    // Company Reference
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
       required: true,
     },
-
-    // Employee Identity
-    employeeId: {
+    userId: { // References User collection (Auth Profile)
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    departmentId: { // References Department collection
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+      required: true,
+    },
+    employeeCode: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
-      uppercase: true,
     },
-
-    // Personal Information
-    firstName: {
+    designation: {
       type: String,
       required: true,
       trim: true,
     },
-
-    lastName: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-
-    gender: {
-      type: String,
-      enum: ["MALE", "FEMALE", "OTHER"],
-    },
-
-    dob: {
+    joiningDate: {
       type: Date,
+      required: true,
     },
-
     mobile: {
       type: String,
       required: true,
       trim: true,
     },
-
-    // Organization
-    departmentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Department",
-      default: null,
-    },
-
-    designationId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Designation",
-      default: null,
-    },
-
-    branchId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Branch",
-      default: null,
-    },
-
-    reportingManager: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
-
-    joiningDate: {
-      type: Date,
+    gender: {
+      type: String,
+      enum: ["MALE", "FEMALE", "OTHER"],
       required: true,
     },
-
-    employmentStatus: {
+    salary: {
+      type: Number,
+      default: 0,
+    },
+    status: {
       type: String,
-      enum: [
-        "ACTIVE",
-        "INACTIVE",
-        "RESIGNED",
-        "TERMINATED"
-      ],
+      enum: ["ACTIVE", "INACTIVE", "TERMINATED"],
       default: "ACTIVE",
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -100,6 +60,7 @@ const employeeSchema = new mongoose.Schema(
   }
 );
 
-const Employee = mongoose.model("Employee", employeeSchema);
+employeeSchema.index({ companyId: 1, employeeCode: 1 }, { unique: true });
 
+const Employee = mongoose.model("Employee", employeeSchema);
 export default Employee;

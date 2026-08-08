@@ -18,12 +18,25 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Super Admin Routes
 import authRoutes from "./routes/authRoutes.js";
 import companyRoutes from "./routes/superAdminRoutes/companyRoutes.js";
+import SubscriptionPlan from "./routes/superAdminRoutes/subcriptionRoutes.js";
 
-// Routes
+// Admin Routes
+import department from "./routes/admin/departmentRoutes.js";
+import  createEmployee  from "./routes/admin/createEmployeeRoutes.js";
+
+
+
+//Super Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/company", companyRoutes);
+app.use("/api/subscription", SubscriptionPlan);
+
+// Admin Routes
+app.use("/api/admin/department", department);
+app.use("/api/admin/employee", createEmployee)
 
 // app.use("/api/employee", employeeRoutes);
 // Error Middleware// app.use(errorHandler);

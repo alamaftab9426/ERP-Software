@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import mongoose from "mongoose";
 import Company from "../../models/Company.js";
 import User from "../../models/User.js";
 
@@ -112,6 +113,7 @@ export const createCompany = async (req, res) => {
           },
           // Development Only
           setupToken,
+          expiresAt: expiry,
         },
       });
     } catch (userError) {
@@ -133,16 +135,13 @@ export const createCompany = async (req, res) => {
 export const getCompanies = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = Math.min(parseInt(req.query.limit) || 10, 100);
     const skip = (page - 1) * limit;
-
     const { search, status } = req.query;
     let query = {};
-    // Filter by Status (ACTIVE, INACTIVE, SUSPENDED)
     if (status) {
       query.status = status.toUpperCase();
     }
-    // Search by Company Name or Company Code
     if (search) {
       query.$or = [
         { companyName: { $regex: search, $options: "i" } },
@@ -155,7 +154,6 @@ export const getCompanies = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-
     return res.status(200).json({
       success: true,
       pagination: {
@@ -178,6 +176,13 @@ export const getCompanies = async (req, res) => {
 export const getCompanyById = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Company ID format.",
+      });
+    }
+    // 2. Query execution
     const company = await Company.findById(id).select("-__v");
     if (!company) {
       return res.status(404).json({
@@ -185,6 +190,7 @@ export const getCompanyById = async (req, res) => {
         message: "Company not found.",
       });
     }
+
     return res.status(200).json({
       success: true,
       data: company,
@@ -198,11 +204,98 @@ export const getCompanyById = async (req, res) => {
   }
 };
 
+export const updateCompany = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      companyName,
+      ownerName,
+      adminMobile,
+      subscriptionPlan,
+      address,
+      logo,
+    } = req.body;
+
+    // 1. Validation: Format Check
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Company ID format.",
+      });
+    }
+
+    // 2. Find target company
+    const company = await Company.findById(id);
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company not found.",
+      });
+    }
+
+    // 3. Validation: Unique Name Check (Agar name change kiya ja raha hai)
+    if (companyName && companyName.trim().toLowerCase() !== company.companyName.toLowerCase()) {
+      const nameExists = await Company.findOne({
+        companyName: { $regex: new RegExp(`^${companyName.trim()}$`, "i") },
+        _id: { $ne: id }, // Apni khud ki ID ko chhod kar baki check karega
+      });
+
+      if (nameExists) {
+        return res.status(409).json({
+          success: false,
+          message: "Another company with this name already exists.",
+        });
+      }
+      company.companyName = companyName.trim();
+    }
+
+    // 4. Update allowed fields
+    if (ownerName) company.ownerName = ownerName.trim();
+    if (adminMobile) company.adminMobile = adminMobile.trim();
+    if (subscriptionPlan) company.subscriptionPlan = subscriptionPlan;
+    if (address) company.address = address.trim();
+    if (logo !== undefined) company.logo = logo; // Empty string allowed h isliye undefined check kiya
+
+    const updatedCompany = await company.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Company details updated successfully.",
+      data: {
+        id: updatedCompany._id,
+        companyName: updatedCompany.companyName,
+        companyCode: updatedCompany.companyCode,
+        ownerName: updatedCompany.ownerName,
+        adminEmail: updatedCompany.adminEmail,
+        adminMobile: updatedCompany.adminMobile,
+        subscriptionPlan: updatedCompany.subscriptionPlan,
+        status: updatedCompany.status,
+        address: updatedCompany.address,
+        logo: updatedCompany.logo,
+      },
+    });
+  } catch (error) {
+    console.error("Error in updateCompany:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
 export const updateCompanyStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body; // Expects: 'ACTIVE', 'INACTIVE', or 'SUSPENDED'
+    const { status } = req.body;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Company ID format.",
+      });
+    }
+
+    // 2. Validation: Status String Check
     if (!status || !["ACTIVE", "INACTIVE", "SUSPENDED"].includes(status.toUpperCase())) {
       return res.status(400).json({
         success: false,
@@ -211,6 +304,8 @@ export const updateCompanyStatus = async (req, res) => {
     }
 
     const targetStatus = status.toUpperCase();
+
+    // 3. Update Company status
     const company = await Company.findByIdAndUpdate(
       id,
       { status: targetStatus },
@@ -223,46 +318,22 @@ export const updateCompanyStatus = async (req, res) => {
         message: "Company not found.",
       });
     }
+
+    // 4. Cascade Status to Users: Only 'ACTIVE' company keeps its users active
     const shouldUsersBeActive = targetStatus === "ACTIVE";
     
     await User.updateMany(
       { companyId: company._id },
       { isActive: shouldUsersBeActive }
     );
+
     return res.status(200).json({
       success: true,
-      message: `Company and associated users have been marked as ${targetStatus}.`,
+      message: `Company status changed to ${targetStatus}. Associated user logins have been updated accordingly.`,
       data: company,
     });
   } catch (error) {
     console.error("Error in updateCompanyStatus:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error.",
-    });
-  }
-};
-
-export const deleteCompany = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const company = await Company.findById(id);
-    if (!company) {
-      return res.status(404).json({
-        success: false,
-        message: "Company not found.",
-      });
-    }
-    // 2. Delete Associated Users first (to prevent orphaned users)
-    await User.deleteMany({ companyId: id });
-    // 3. Delete the Company Document
-    await Company.findByIdAndDelete(id);
-    return res.status(200).json({
-      success: true,
-      message: "Company and all associated accounts deleted successfully.",
-    });
-  } catch (error) {
-    console.error("Error in deleteCompany:", error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error.",
