@@ -3,10 +3,9 @@ import {
   FiTag,
 } from "react-icons/fi";
 
-
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import LogoutButton from "../../pages/Logoutbutton";
-const AdminHeader = ({sidebarWidth}) => {
+const EmloyeeHeader = ({sidebarWidth}) => {
   return (
     <div>
         <header
@@ -34,4 +33,4 @@ const AdminHeader = ({sidebarWidth}) => {
   )
 }
 
-export default AdminHeader
+export default EmloyeeHeader

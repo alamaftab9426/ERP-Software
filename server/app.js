@@ -7,7 +7,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: true, 
     credentials: true,
   })
 );
@@ -29,7 +29,8 @@ import  createEmployee  from "./routes/admin/createEmployeeRoutes.js";
 
 
 
-//Super Routes
+
+
 app.use("/api/auth", authRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/api/subscription", SubscriptionPlan);

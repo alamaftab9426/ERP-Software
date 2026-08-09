@@ -2,11 +2,12 @@ import { NavLink } from "react-router-dom";
 import React, { useState } from 'react';
 import {
   FiGrid,
-  FiBriefcase,
-  FiUsers,
-  FiSettings,
-  FiFileText,
+  FiClock,
+  FiCalendar,
+  FiCheckSquare,
   FiActivity,
+  FiFileText,
+  FiSettings,
   FiChevronDown,
 } from "react-icons/fi";
 
@@ -14,52 +15,51 @@ const sidebarMenu = [
   {
     label: "Dashboard",
     icon: FiGrid,
-    path: "/admin",
+    path: "/employee",
   },
   {
-    label: "Organization",
-    icon: FiBriefcase,
+    label: "My Attendance",
+    icon: FiClock,
     children: [
-      { label: "Branch Setup", path: "/admin/organization/branch" },
-      { label: "Department Setup", path: "/admin/organization/department" },
-      { label: "Designation Setup", path: "/admin/organization/designation" },
-      { label: "Roles & Permissions", path: "/admin/organization/role-permission" },
+      { label: "Punch In / Out", path: "/employee/attendance/punchin-punchout" },
+      { label: "Attendance Logs", path: "/employee/attendance/attendancelog" },
     ],
   },
   {
-    label: "HRMS Management",
-    icon: FiUsers,
+    label: "My Leaves",
+    icon: FiCalendar,
     children: [
-      { label: "Employees Directory", path: "/admin/hr/employees" },
-      { label: "Track Attendance", path: "/admin/hr/attendance" },
-      { label: "Review Leaves", path: "/admin/hr/leaves" },
-      { label: "Shift Planner", path: "/admin/hr/shift" },
-      { label: "Holidays Config", path: "/admin/hr/holidays" },
-      { label: "Process Payroll", path: "/admin/hr/payroll" },
+      { label: "Apply Leave", path: "/employee/leaves/apply-leaves" },
+      { label: "Leave Balance", path: "/employee/leaves/balance" },
+      { label: "Holiday Calendar", path: "/employee/leaves/holidays" },
     ],
   },
   {
-    label: "Field Operations",
+    label: "My Tasks",
+    icon: FiCheckSquare,
+    path: "/employee/my-tasks",
+  },
+  {
+    label: "My Operations",
     icon: FiActivity,
     children: [
-      { label: "Assign & Review Tasks", path: "/admin/operations/tasks" },
-      { label: "Approve Expenses", path: "/admin/operations/expenses" },
-      { label: "Live GPS Tracking", path: "/admin/operations/live-tracking" },
+      { label: "Claim Expense", path: "/employee/operations/expense-claim" },
+      { label: "My Route Log", path: "/employee/operations/my-routes" },
     ],
   },
   {
-    label: "Reports Center",
+    label: "My Payroll",
     icon: FiFileText,
-    path: "/admin/reports",
+    path: "/employee/payroll",
   },
   {
-    label: "System Settings",
+    label: "Settings",
     icon: FiSettings,
-    path: "/admin/settings",
+    path: "/employee/settings",
   },
 ];
 
-const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
+const EmployeeSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const [openGroups, setOpenGroups] = useState(() =>
     sidebarMenu
       .filter((item) => item.children?.some((c) => c.active))
@@ -87,7 +87,7 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
         {sidebarOpen ? (
           <div>
             <span className="text-2xl font-bold text-[#1E8FA6]">AIERP</span>
-            <span className="text-2xl font-bold text-white">ADMIN</span>
+            <span className="text-2xl font-bold text-white">USER</span>
           </div>
         ) : (
           <span className="text-2xl font-bold text-[#1E8FA6]">AIERP</span>
@@ -140,8 +140,8 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 to={item.path}
                 className={({ isActive }) =>
                   `relative w-full flex items-center text-sm transition-colors
-                    ${sidebarOpen ? "gap-3 px-6 py-3" : "justify-center py-3"}
-                     ${isActive
+        ${sidebarOpen ? "gap-3 px-6 py-3" : "justify-center py-3"}
+        ${isActive
                     ? "bg-[#16213A] text-white"
                     : "text-slate-400 hover:bg-[#16213A]/60 hover:text-white"
                   }`
@@ -217,4 +217,4 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   );
 };
 
-export default AdminSidebar;
+export default EmployeeSidebar;
