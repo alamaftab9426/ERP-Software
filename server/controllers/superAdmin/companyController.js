@@ -2,6 +2,7 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 import Company from "../../models/Company.js";
 import User from "../../models/User.js";
+import { sendSetupPasswordEmail } from "../../utils/nodemailer.js"; // niche is file ka code hai
 
 export const createCompany = async (req, res) => {
   try {
@@ -93,14 +94,29 @@ export const createCompany = async (req, res) => {
         isActive: true,
       });
 
+      // Email bhejo — agar ye fail bhi ho jaaye, company/user creation ko rollback nahi karna
+      // (admin baad mein "resend setup link" se dobara bhej sakta hai)
+      try {
+        await sendSetupPasswordEmail({
+          to: company.adminEmail,
+          ownerName: company.ownerName,
+          companyName: company.companyName,
+          setupToken,
+        });
+      } catch (mailError) {
+        console.error("Setup email failed to send:", mailError);
+        // yahan hum request ko fail nahi karte, sirf log karte hain
+      }
+
       return res.status(200).json({
         success: true,
         message:
-          "Company created successfully. Password setup link will be sent to the company admin email.",
+          "Company created successfully. Password setup link has been sent to the company admin email.",
 
         data: {
           company: {
             id: company._id,
+            _id: company._id,
             companyName: company.companyName,
             companyCode: company.companyCode,
             ownerName: company.ownerName,
@@ -110,10 +126,13 @@ export const createCompany = async (req, res) => {
             status: company.status,
             address: company.address,
             logo: company.logo,
+            createdAt: company.createdAt,
           },
-          // Development Only
-          setupToken,
-          expiresAt: expiry,
+          // Development Only — production mein ye response se hata dena
+          ...(process.env.NODE_ENV !== "production" && {
+            setupToken,
+            expiresAt: expiry,
+          }),
         },
       });
     } catch (userError) {
@@ -334,6 +353,47 @@ export const updateCompanyStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in updateCompanyStatus:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error.",
+    });
+  }
+};
+
+export const deleteCompany = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Check ID Format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Company ID format.",
+      });
+    }
+
+    // 2. Company dhoondho
+    const company = await Company.findById(id);
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company not found.",
+      });
+    }
+
+    // 3. Pehle us Company se jude SARI USERS/ADMINS ko delete karo (CASCADE DELETE)
+    await User.deleteMany({ companyId: company._id });
+
+    // 4. Ab Company ko permanent delete karo
+    await Company.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Company and its associated admin/users deleted permanently from database.",
+    });
+
+  } catch (error) {
+    console.error("Error in deleteCompany:", error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error.",

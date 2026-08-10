@@ -1,5 +1,5 @@
 import express from "express";
-import { createCompany, getCompanies, getCompanyById, updateCompany, updateCompanyStatus } from "../../controllers/superAdmin/companyController.js";
+import { createCompany, getCompanies, getCompanyById, updateCompany, updateCompanyStatus,deleteCompany } from "../../controllers/superAdmin/companyController.js";
 import  verifyToken from "../../middleware/verifyToken.js";
 import { authorize } from "../../middleware/authorize.js";
 
@@ -10,6 +10,7 @@ router.get("/companies-get", verifyToken, authorize("SUPER_ADMIN"),  getCompanie
 router.get("/companies-get/:id",verifyToken, authorize("SUPER_ADMIN"),getCompanyById);
 router.put("/companies-update/:id", verifyToken, authorize("SUPER_ADMIN"), updateCompany);
 router.patch("/companies-update-status/:id", verifyToken, authorize("SUPER_ADMIN"), updateCompanyStatus);
+router.delete("/companies-delete/:id", verifyToken, authorize("SUPER_ADMIN"),deleteCompany);
 
 
 export default router;

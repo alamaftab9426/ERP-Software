@@ -41,7 +41,7 @@ const companySchema = new mongoose.Schema(
 
     subscriptionPlan: {
       type: String,
-      enum: ["BASIC", "PRO", "ENTERPRISE"],
+      enum: ["Basic", "Pro", "Enterprise"],
       default: "BASIC",
     },
     

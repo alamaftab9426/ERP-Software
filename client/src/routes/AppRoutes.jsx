@@ -4,6 +4,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/Login";
 import ProtectRoutes from "./ProtectRoutes";
 
+import  SetupPasswordPage  from "../pages/SetupPasswordPage"
+
 // Admin Pages
 import AdminLayout from "../layouts/AdminLayout";
 import AdminDashboard from "../pages/Admin/AdminDashboard";
@@ -61,6 +63,7 @@ export default function AppRoutes() {
     <Routes>
       {/* Login */}
       <Route path="/" element={<Login />} />
+      <Route path="/setup-password" element={<SetupPasswordPage />} />
 
 
       {/* Super Admin */}
@@ -163,6 +166,7 @@ export default function AppRoutes() {
 
 
       {/* 404 */}
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
 

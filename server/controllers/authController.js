@@ -152,7 +152,6 @@ export const setupPassword = async (req, res) => {
   }
 };
 
-// 1. Logout Controller (Cookie Clear karne ke liye)
 export const logout = async (req, res) => {
   try {
     res.clearCookie("accessToken", {
@@ -172,6 +171,7 @@ export const logout = async (req, res) => {
     });
   }
 };
+
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
