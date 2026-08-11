@@ -223,7 +223,7 @@ const LoginPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@company.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 text-black bg-white text-sm
                     focus:outline-none focus:ring-2 focus:ring-[#D9A94E]/40 focus:border-[#D9A94E] transition-all"
                 />
               </div>
@@ -248,7 +248,7 @@ const LoginPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-slate-200 bg-white text-sm
+                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-slate-200 text-black bg-white text-sm
                     focus:outline-none focus:ring-2 focus:ring-[#D9A94E]/40 focus:border-[#D9A94E] transition-all"
                 />
                 <button
