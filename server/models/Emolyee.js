@@ -7,12 +7,12 @@ const employeeSchema = new mongoose.Schema(
       ref: "Company",
       required: true,
     },
-    userId: { // References User collection (Auth Profile)
+    userId: { 
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    departmentId: { // References Department collection
+    departmentId: { 
       type: mongoose.Schema.Types.ObjectId,
       ref: "Department",
       required: true,
@@ -38,7 +38,7 @@ const employeeSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ["MALE", "FEMALE", "OTHER"],
+      enum: [ "Male", "Female", "Other"], // <--- Fixed: Case flexible
       required: true,
     },
     salary: {
@@ -47,7 +47,7 @@ const employeeSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["ACTIVE", "INACTIVE", "TERMINATED"],
+      enum: ["ACTIVE", "INACTIVE", "ON_LEAVE", "TERMINATED"], // <--- Fixed: Added ON_LEAVE
       default: "ACTIVE",
     },
     isDeleted: {

@@ -20,6 +20,6 @@ router.get("/get-departments/:id", verifyToken,  authorize("ADMIN", "HR"),getDep
 router.put("/update-departments/:id", verifyToken, authorize("ADMIN"), updateDepartment);
 router.patch("/update-departments/:id/status", verifyToken, authorize("ADMIN", "HR"),updateDepartmentStatus);
 // Soft Delete Department - Restricted to ADMIN role
-router.delete("/admin/departments/:id",authorize("ADMIN"), deleteDepartment);
+router.delete("/departments-delete/:id",authorize("ADMIN"), deleteDepartment);
 
 export default router;

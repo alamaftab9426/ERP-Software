@@ -26,6 +26,7 @@ import SubscriptionPlan from "./routes/superAdminRoutes/subcriptionRoutes.js";
 // Admin Routes
 import department from "./routes/admin/departmentRoutes.js";
 import  createEmployee  from "./routes/admin/createEmployeeRoutes.js";
+import trackingRoutes from "./routes/admin/trackingRoutes.js";
 
 
 
@@ -38,6 +39,9 @@ app.use("/api/subscription", SubscriptionPlan);
 // Admin Routes
 app.use("/api/admin/department", department);
 app.use("/api/admin/employee", createEmployee)
+app.use("/api/admin/tracking", trackingRoutes)
+
+
 
 // app.use("/api/employee", employeeRoutes);
 // Error Middleware// app.use(errorHandler);

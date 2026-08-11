@@ -16,17 +16,7 @@ const sidebarMenu = [
     icon: FiGrid,
     path: "/admin",
   },
-  {
-    label: "Organization",
-    icon: FiBriefcase,
-    children: [
-      { label: "Branch Setup", path: "/admin/organization/branch" },
-      { label: "Department Setup", path: "/admin/organization/department" },
-      { label: "Designation Setup", path: "/admin/organization/designation" },
-      { label: "Roles & Permissions", path: "/admin/organization/role-permission" },
-    ],
-  },
-  {
+   {
     label: "HRMS Management",
     icon: FiUsers,
     children: [
@@ -38,6 +28,17 @@ const sidebarMenu = [
       { label: "Process Payroll", path: "/admin/hr/payroll" },
     ],
   },
+  {
+    label: "Organization",
+    icon: FiBriefcase,
+    children: [
+      { label: "Branch Setup", path: "/admin/organization/branch" },
+      { label: "Department Setup", path: "/admin/organization/department" },
+      { label: "Designation Setup", path: "/admin/organization/designation" },
+      { label: "Roles & Permissions", path: "/admin/organization/role-permission" },
+    ],
+  },
+ 
   {
     label: "Field Operations",
     icon: FiActivity,
