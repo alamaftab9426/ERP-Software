@@ -16,6 +16,18 @@ const sidebarMenu = [
     icon: FiGrid,
     path: "/admin",
   },
+
+  {
+    label: "Organization",
+    icon: FiBriefcase,
+    children: [
+      { label: "Branch Setup", path: "/admin/organization/branch" },
+      { label: "Department Setup", path: "/admin/organization/department" },
+      { label: "Designation Setup", path: "/admin/organization/designation" },
+      { label: "Roles & Permissions", path: "/admin/organization/role-permission" },
+    ],
+  },
+
    {
     label: "HRMS Management",
     icon: FiUsers,
@@ -28,16 +40,7 @@ const sidebarMenu = [
       { label: "Process Payroll", path: "/admin/hr/payroll" },
     ],
   },
-  {
-    label: "Organization",
-    icon: FiBriefcase,
-    children: [
-      { label: "Branch Setup", path: "/admin/organization/branch" },
-      { label: "Department Setup", path: "/admin/organization/department" },
-      { label: "Designation Setup", path: "/admin/organization/designation" },
-      { label: "Roles & Permissions", path: "/admin/organization/role-permission" },
-    ],
-  },
+  
  
   {
     label: "Field Operations",
@@ -87,11 +90,11 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
       <div className={`h-[76px] flex items-center bg-[#0B1220] shrink-0 ${sidebarOpen ? "justify-between px-6" : "justify-center px-2"}`}>
         {sidebarOpen ? (
           <div>
-            <span className="text-2xl font-bold text-[#1E8FA6]">AIERP</span>
-            <span className="text-2xl font-bold text-white">ADMIN</span>
+            <span className="text-2xl font-bold text-[#1E8FA6]">ADMIN</span>
+            <span className="text-2xl font-bold text-white">COMPANY</span>
           </div>
         ) : (
-          <span className="text-2xl font-bold text-[#1E8FA6]">AIERP</span>
+          <span className="text-xl font-bold text-[#1E8FA6]">ADMIN</span>
         )}
 
         <button

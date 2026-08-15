@@ -103,11 +103,11 @@ const SuperAdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
       <div className={`h-[76px] flex items-center bg-[#0B1220] shrink-0 ${sidebarOpen ? "justify-between px-6" : "justify-center px-2"}`}>
         {sidebarOpen ? (
           <div>
-            <span className="text-2xl font-bold text-[#1E8FA6]">AIERP</span>
-            <span className="text-2xl font-bold text-white">SUPADMIN</span>
+            <span className="text-2xl font-bold text-[#1E8FA6]">SUP</span>
+            <span className="text-2xl font-bold text-white">ERADMIN</span>
           </div>
         ) : (
-          <span className="text-2xl font-bold text-[#1E8FA6]">N</span>
+          <span className="text-xl font-bold text-[#1E8FA6]">SUPER</span>
         )}
 
         <button

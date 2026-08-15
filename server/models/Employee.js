@@ -38,7 +38,7 @@ const employeeSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: [ "Male", "Female", "Other"], // <--- Fixed: Case flexible
+      enum: [ "Male", "Female", "Other"],
       required: true,
     },
     salary: {
@@ -47,7 +47,7 @@ const employeeSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["ACTIVE", "INACTIVE", "ON_LEAVE", "TERMINATED"], // <--- Fixed: Added ON_LEAVE
+      enum: ["ACTIVE", "INACTIVE", "ON_LEAVE", "TERMINATED"], 
       default: "ACTIVE",
     },
     isDeleted: {

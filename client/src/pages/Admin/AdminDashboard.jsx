@@ -1,4 +1,9 @@
+import AdminLiveEmployeeMap from "../../components/AdminLiveEmployeeMap";
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import { getCompanyLatestLocationsApi,} from "../../services/locationService";
 import React from 'react'
+import { useAuth } from "../../context/AuthContext";
 import {
   FiUsers,
   FiUserCheck,
@@ -9,6 +14,108 @@ import {
 } from "react-icons/fi";
 
 const AdminDashboard = () => {
+  const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
+   const { user } = useAuth();
+const [employees, setEmployees] = useState([]);
+
+useEffect(() => {
+  const loadEmployeeLocations = async () => {
+    try {
+      const response =
+        await getCompanyLatestLocationsApi();
+
+      console.log(
+        "INITIAL EMPLOYEE LOCATIONS:",
+        response.data
+      );
+
+      setEmployees(response.data.data);
+    } catch (error) {
+      console.error(
+        "EMPLOYEE LOCATION ERROR:",
+        error.response?.data ||
+          error.message
+      );
+    }
+  };
+
+  loadEmployeeLocations();
+}, []);
+
+useEffect(() => {
+  if (!user?.companyId) {
+    console.log("Company ID not available yet");
+    return;
+  }
+
+  const socket = io(SOCKET_URL, {
+    withCredentials: true,
+  });
+
+  socket.on("connect", () => {
+    console.log(
+      "ADMIN SOCKET CONNECTED:",
+      socket.id
+    );
+
+    socket.emit(
+      "join-company",
+      user.companyId
+    );
+
+    console.log(
+      "JOINING COMPANY ROOM:",
+      user.companyId
+    );
+  });
+
+  socket.on(
+    "employee:location:update",
+    (location) => {
+      console.log(
+        "REAL TIME EMPLOYEE LOCATION:",
+        location
+      );
+
+      setEmployees((previousEmployees) =>
+        previousEmployees.map((employee) => {
+          if (
+            employee.employeeId ===
+            location.employeeId
+          ) {
+            return {
+              ...employee,
+
+              location: {
+                latitude: location.latitude,
+                longitude: location.longitude,
+                accuracy: location.accuracy,
+                speed: location.speed,
+                heading: location.heading,
+                timestamp: location.timestamp,
+              },
+            };
+          }
+
+          return employee;
+        })
+      );
+    }
+  );
+
+  socket.on("connect_error", (error) => {
+    console.error(
+      "ADMIN SOCKET ERROR:",
+      error
+    );
+  });
+
+  return () => {
+    console.log("ADMIN SOCKET DISCONNECTED");
+
+    socket.disconnect();
+  };
+}, [user?.companyId]);
 
   const statCards = [
     {
@@ -103,39 +210,12 @@ const AdminDashboard = () => {
         </div>
 
         {/* WIDGETS ROW 1 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Attendance Overview */}
-          <div className="rounded-xl border border-slate-200 p-5">
-            <h2 className="font-semibold text-slate-800 mb-4">Attendance Overview</h2>
-            <div className="h-72 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 text-sm">
-              Attendance chart goes here
-            </div>
-          </div>
+        <div className=" w-full mb-6">
+       {/* LIVE EMPLOYEE TRACKING */}
+      <div className="rounded-xl border border-slate-200 p-5">
+         <AdminLiveEmployeeMap  employees={employees} />
+        </div>
 
-          {/* Leave Requests */}
-          <div className="rounded-xl border border-slate-200 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-slate-800">Recent Leave Requests</h2>
-              <button className="text-xs font-medium text-[#1E8FA6] hover:underline">
-                View all
-              </button>
-            </div>
-            <div className="divide-y divide-slate-100">
-              {leaveRequests.map((req, i) => (
-                <div key={i} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="text-sm font-medium text-slate-800">{req.name}</p>
-                    <p className="text-xs text-slate-400">{req.dept} · {req.days}</p>
-                  </div>
-                  <span
-                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[req.status]}`}
-                  >
-                    {req.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* WIDGETS ROW 2 */}
@@ -164,28 +244,27 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Upcoming Holidays */}
+       
+          {/* Leave Requests */}
           <div className="rounded-xl border border-slate-200 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="flex items-center gap-2 font-semibold text-slate-800">
-                <FiCalendar size={16} />
-                Upcoming Holidays
-              </h2>
+              <h2 className="font-semibold text-slate-800">Recent Leave Requests</h2>
               <button className="text-xs font-medium text-[#1E8FA6] hover:underline">
                 View all
               </button>
             </div>
-            <div className="space-y-4">
-              {upcomingHolidays.map((holiday, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <span className="mt-1 h-2 w-2 rounded-full bg-[#1E8FA6] shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm text-slate-700 font-medium">{holiday.name}</p>
-                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                      <FiClock size={11} />
-                      {holiday.date}
-                    </p>
+            <div className="divide-y divide-slate-100">
+              {leaveRequests.map((req, i) => (
+                <div key={i} className="flex items-center justify-between py-3">
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{req.name}</p>
+                    <p className="text-xs text-slate-400">{req.dept} · {req.days}</p>
                   </div>
+                  <span
+                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusStyles[req.status]}`}
+                  >
+                    {req.status}
+                  </span>
                 </div>
               ))}
             </div>

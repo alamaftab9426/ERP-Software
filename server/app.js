@@ -2,6 +2,10 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+
+import locationRoutes from "./routes/locationHistoryRoutes.js"
+
+
 // Super Admin Routes
 import authRoutes from "./routes/authRoutes.js";
 import companyRoutes from "./routes/superAdminRoutes/companyRoutes.js";
@@ -70,6 +74,8 @@ app.use("/api/subscription", subscriptionRoutes);
 // ADMIN ROUTES
 app.use("/api/admin/department", departmentRoutes);
 app.use("/api/admin/employee", createEmployeeRoutes);
+
+app.use("/api/location-history", locationRoutes);
 
 
 export default app;

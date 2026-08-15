@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import mongoose from "mongoose";
 import User from "../../models/User.js";
-import Employee from "../../models/Emolyee.js"; // Aapke model path ke according
+import Employee from "../../models/Employee.js"; 
 import Department from "../../models/Department.js";
 import { sendSetupPasswordEmail } from "../../utils/nodemailer.js";
 

@@ -8,6 +8,12 @@ const connectDB = async () => {
     console.error("MongoDB Connection Error:", error.message);
     process.exit(1);
   }
+  mongoose.connection.once("open", () => {
+  console.log("====================================");
+  console.log("MONGO DATABASE:", mongoose.connection.name);
+  console.log("MONGO HOST:", mongoose.connection.host);
+  console.log("====================================");
+});
 };
 
 export default connectDB;
