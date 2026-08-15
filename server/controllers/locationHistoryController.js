@@ -23,10 +23,8 @@ export const createLocationHistory = async (req, res) => {
           "latitude, longitude and timestamp are required.",
       });
     }
+    //GPS COORDINATE VALIDATION
 
-    // ==========================================
-    // 2. GPS COORDINATE VALIDATION
-    // ==========================================
     if (
       latitude < -90 ||
       latitude > 90 ||
@@ -106,25 +104,65 @@ export const createLocationHistory = async (req, res) => {
     // ==========================================
     // 7. REAL-TIME ADMIN UPDATE
     // ==========================================
-    io.to(`company:${employee.companyId}`).emit(
-      "employee:location:update",
-      {
-        employeeId: employee._id,
-        userId: employee.userId,
+    // io.to(`company:${employee.companyId}`).emit(
+    //   "employee:location:update",
+    //   {
+    //     employeeId: employee._id,
+    //     userId: employee.userId,
 
-        employeeCode: employee.employeeCode,
-        designation: employee.designation,
+    //     employeeCode: employee.employeeCode,
+    //     designation: employee.designation,
 
-        latitude: newLocation.latitude,
-        longitude: newLocation.longitude,
+    //     latitude: newLocation.latitude,
+    //     longitude: newLocation.longitude,
 
-        accuracy: newLocation.accuracy,
-        speed: newLocation.speed,
-        heading: newLocation.heading,
+    //     accuracy: newLocation.accuracy,
+    //     speed: newLocation.speed,
+    //     heading: newLocation.heading,
 
-        timestamp: newLocation.timestamp,
-      }
-    );
+    //     timestamp: newLocation.timestamp,
+    //   }
+    // );
+    // ==========================================
+// 7. REAL-TIME ADMIN UPDATE
+// ==========================================
+
+const roomName = `company:${employee.companyId}`;
+
+const locationPayload = {
+  employeeId: employee._id.toString(),
+  userId: employee.userId.toString(),
+
+  employeeCode: employee.employeeCode,
+  designation: employee.designation,
+
+  latitude: newLocation.latitude,
+  longitude: newLocation.longitude,
+
+  accuracy: newLocation.accuracy,
+  speed: newLocation.speed,
+  heading: newLocation.heading,
+
+  timestamp: newLocation.timestamp,
+};
+
+console.log("====================================");
+console.log("📍 LOCATION UPDATE RECEIVED");
+console.log("EMPLOYEE:", employee.employeeCode);
+console.log("LAT:", newLocation.latitude);
+console.log("LNG:", newLocation.longitude);
+console.log("ROOM:", roomName);
+console.log("====================================");
+
+io.to(roomName).emit(
+  "employee:location:update",
+  locationPayload
+);
+
+console.log(
+  "📡 LOCATION EMITTED TO:",
+  roomName
+);
 
     // ==========================================
     // 8. RESPONSE

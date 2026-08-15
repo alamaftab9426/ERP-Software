@@ -69,40 +69,53 @@ useEffect(() => {
     );
   });
 
-  socket.on(
-    "employee:location:update",
-    (location) => {
+ socket.on(
+  "employee:location:update",
+  (location) => {
+
+    console.log(
+      "🔥 REAL TIME LOCATION RECEIVED:",
+      location
+    );
+
+    setEmployees((previousEmployees) => {
+
       console.log(
-        "REAL TIME EMPLOYEE LOCATION:",
-        location
+        "BEFORE UPDATE:",
+        previousEmployees
       );
 
-      setEmployees((previousEmployees) =>
-        previousEmployees.map((employee) => {
-          if (
-            employee.employeeId ===
-            location.employeeId
-          ) {
-            return {
-              ...employee,
+      return previousEmployees.map((employee) => {
 
-              location: {
-                latitude: location.latitude,
-                longitude: location.longitude,
-                accuracy: location.accuracy,
-                speed: location.speed,
-                heading: location.heading,
-                timestamp: location.timestamp,
-              },
-            };
-          }
+        if (
+          String(employee.employeeId) ===
+          String(location.employeeId)
+        ) {
 
-          return employee;
-        })
-      );
-    }
-  );
+          console.log(
+            "✅ MATCHED EMPLOYEE:",
+            employee.name
+          );
 
+          return {
+            ...employee,
+
+            location: {
+              latitude: location.latitude,
+              longitude: location.longitude,
+              accuracy: location.accuracy,
+              speed: location.speed,
+              heading: location.heading,
+              timestamp: location.timestamp,
+            },
+          };
+        }
+
+        return employee;
+      });
+    });
+  }
+);
   socket.on("connect_error", (error) => {
     console.error(
       "ADMIN SOCKET ERROR:",
@@ -213,7 +226,7 @@ useEffect(() => {
         <div className=" w-full mb-6">
        {/* LIVE EMPLOYEE TRACKING */}
       <div className="rounded-xl border border-slate-200 p-5">
-         <AdminLiveEmployeeMap  employees={employees} />
+         <AdminLiveEmployeeMap  employees={employees}/>
         </div>
 
         </div>

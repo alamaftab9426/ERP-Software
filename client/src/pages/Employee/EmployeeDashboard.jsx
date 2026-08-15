@@ -16,21 +16,14 @@ import {
 
 
 const EmployeeDashboard = () => {
-
-  // ==========================================
-  // LOCATION UPDATE
-  // ==========================================
-
+  
   const handleLocationUpdate = useCallback(
     async (location) => {
-
       console.log(
         "GPS FROM MAP:",
         location
       );
-
       try {
-
         const response =
           await saveEmployeeLocationApi(
             location
