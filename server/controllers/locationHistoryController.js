@@ -147,7 +147,7 @@ const locationPayload = {
 };
 
 console.log("====================================");
-console.log("📍 LOCATION UPDATE RECEIVED");
+console.log("📍 LOCATION UPDATE recive");
 console.log("EMPLOYEE:", employee.employeeCode);
 console.log("LAT:", newLocation.latitude);
 console.log("LNG:", newLocation.longitude);

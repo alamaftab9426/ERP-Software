@@ -74,7 +74,7 @@ useEffect(() => {
   (location) => {
 
     console.log(
-      "🔥 REAL TIME LOCATION RECEIVED:",
+      " REAL TIME LOCATION RECEIVED:",
       location
     );
 
