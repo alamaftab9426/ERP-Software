@@ -1,134 +1,280 @@
-import AdminLiveEmployeeMap from "../../components/AdminLiveEmployeeMap";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { getCompanyLatestLocationsApi,} from "../../services/locationService";
-import React from 'react'
+import AdminLiveEmployeeMap from "../../components/AdminLiveEmployeeMap";
+import { getCompanyLatestLocationsApi } from "../../services/locationService";
 import { useAuth } from "../../context/AuthContext";
+
 import {
   FiUsers,
   FiUserCheck,
   FiUserX,
   FiDollarSign,
-  FiClock,
-  FiCalendar,
 } from "react-icons/fi";
 
 const AdminDashboard = () => {
   const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
-   const { user } = useAuth();
-const [employees, setEmployees] = useState([]);
 
-useEffect(() => {
-  const loadEmployeeLocations = async () => {
-    try {
-      const response =
-        await getCompanyLatestLocationsApi();
+  const { user } = useAuth();
 
-      console.log(
-        "INITIAL EMPLOYEE LOCATIONS:",
-        response.data
-      );
+  const [employees, setEmployees] = useState([]);
 
-      setEmployees(response.data.data);
-    } catch (error) {
-      console.error(
-        "EMPLOYEE LOCATION ERROR:",
-        error.response?.data ||
-          error.message
-      );
+  // =====================================================
+  // 1. INITIAL EMPLOYEE LOCATIONS
+  // =====================================================
+
+  useEffect(() => {
+    if (!user?.companyId) {
+      console.log("⏳ Company ID not available yet");
+      return;
     }
-  };
 
-  loadEmployeeLocations();
-}, []);
+    const loadEmployeeLocations = async () => {
+      try {
+        console.log(
+          "📡 Loading initial employee locations..."
+        );
 
-useEffect(() => {
-  if (!user?.companyId) {
-    console.log("Company ID not available yet");
-    return;
-  }
+        const response =
+          await getCompanyLatestLocationsApi();
 
-  const socket = io(SOCKET_URL, {
-    withCredentials: true,
-  });
+        console.log(
+          "📍 INITIAL EMPLOYEE LOCATIONS:",
+          response.data
+        );
 
-  socket.on("connect", () => {
-    console.log(
-      "ADMIN SOCKET CONNECTED:",
-      socket.id
-    );
+        setEmployees(
+          response.data?.data || []
+        );
+      } catch (error) {
+        console.error(
+          "❌ EMPLOYEE LOCATION ERROR:",
+          error.response?.data ||
+            error.message
+        );
+      }
+    };
 
-    socket.emit(
-      "join-company",
-      user.companyId
-    );
+    loadEmployeeLocations();
+  }, [user?.companyId]);
 
-    console.log(
-      "JOINING COMPANY ROOM:",
-      user.companyId
-    );
-  });
+  // =====================================================
+  // 2. ADMIN SOCKET
+  // =====================================================
 
- socket.on(
-  "employee:location:update",
-  (location) => {
-
-    console.log(
-      " REAL TIME LOCATION RECEIVED:",
-      location
-    );
-
-    setEmployees((previousEmployees) => {
-
+  useEffect(() => {
+    if (!user?.companyId) {
       console.log(
-        "BEFORE UPDATE:",
-        previousEmployees
+        "⏳ Socket waiting for company ID..."
       );
 
-      return previousEmployees.map((employee) => {
+      return;
+    }
 
-        if (
-          String(employee.employeeId) ===
-          String(location.employeeId)
-        ) {
+    if (!SOCKET_URL) {
+      console.error(
+        "❌ VITE_SOCKET_URL is missing"
+      );
 
-          console.log(
-            "✅ MATCHED EMPLOYEE:",
-            employee.name
-          );
+      return;
+    }
 
-          return {
-            ...employee,
-
-            location: {
-              latitude: location.latitude,
-              longitude: location.longitude,
-              accuracy: location.accuracy,
-              speed: location.speed,
-              heading: location.heading,
-              timestamp: location.timestamp,
-            },
-          };
-        }
-
-        return employee;
-      });
-    });
-  }
-);
-  socket.on("connect_error", (error) => {
-    console.error(
-      "ADMIN SOCKET ERROR:",
-      error
+    console.log(
+      "🔌 CONNECTING ADMIN SOCKET:",
+      SOCKET_URL
     );
-  });
 
-  return () => {
-    console.log("ADMIN SOCKET DISCONNECTED");
+    const socket = io(SOCKET_URL, {
+      withCredentials: true,
+    });
 
-    socket.disconnect();
-  };
-}, [user?.companyId]);
+    // ===================================================
+    // SOCKET CONNECT
+    // ===================================================
+
+    socket.on("connect", () => {
+      console.log(
+        "✅ ADMIN SOCKET CONNECTED:",
+        socket.id
+      );
+
+      console.log(
+        "🏢 JOINING COMPANY ROOM:",
+        user.companyId
+      );
+
+      socket.emit(
+        "join-company",
+        user.companyId
+      );
+    });
+
+    // ===================================================
+    // COMPANY ROOM JOIN CONFIRMATION
+    // ===================================================
+
+    socket.on(
+      "joined-company",
+      (data) => {
+        console.log(
+          "✅ JOINED COMPANY ROOM:",
+          data
+        );
+      }
+    );
+
+    // ===================================================
+    // REAL-TIME EMPLOYEE LOCATION
+    // ===================================================
+
+    socket.on(
+      "employee:location:update",
+      (location) => {
+        console.log(
+          "🔥 REAL TIME LOCATION RECEIVED:",
+          location
+        );
+
+        setEmployees(
+          (previousEmployees) => {
+
+            console.log(
+              "👥 EMPLOYEES BEFORE UPDATE:",
+              previousEmployees
+            );
+
+            return previousEmployees.map(
+              (employee) => {
+
+                const employeeId =
+                  String(
+                    employee.employeeId
+                  );
+
+                const incomingEmployeeId =
+                  String(
+                    location.employeeId
+                  );
+
+                // =====================================
+                // SAME EMPLOYEE
+                // =====================================
+
+                if (
+                  employeeId ===
+                  incomingEmployeeId
+                ) {
+
+                  console.log(
+                    "🎯 MATCHED EMPLOYEE:",
+                    employee.name,
+                    employee.employeeCode
+                  );
+
+                  console.log(
+                    "📍 OLD LOCATION:",
+                    employee.location
+                  );
+
+                  console.log(
+                    "📍 NEW LOCATION:",
+                    location.latitude,
+                    location.longitude
+                  );
+
+                  return {
+                    ...employee,
+
+                    location: {
+                      latitude:
+                        Number(
+                          location.latitude
+                        ),
+
+                      longitude:
+                        Number(
+                          location.longitude
+                        ),
+
+                      accuracy:
+                        location.accuracy,
+
+                      speed:
+                        location.speed,
+
+                      heading:
+                        location.heading,
+
+                      timestamp:
+                        location.timestamp,
+                    },
+                  };
+                }
+
+                // =====================================
+                // OTHER EMPLOYEES UNCHANGED
+                // =====================================
+
+                return employee;
+              }
+            );
+          }
+        );
+      }
+    );
+
+    // ===================================================
+    // SOCKET ERROR
+    // ===================================================
+
+    socket.on(
+      "connect_error",
+      (error) => {
+        console.error(
+          "❌ ADMIN SOCKET ERROR:",
+          error
+        );
+      }
+    );
+
+    // ===================================================
+    // SOCKET DISCONNECT
+    // ===================================================
+
+    socket.on(
+      "disconnect",
+      (reason) => {
+        console.log(
+          "🔌 ADMIN SOCKET DISCONNECTED:",
+          reason
+        );
+      }
+    );
+
+    // ===================================================
+    // CLEANUP
+    // ===================================================
+
+    return () => {
+      console.log(
+        "🧹 CLEANING ADMIN SOCKET"
+      );
+
+      socket.off("connect");
+      socket.off("joined-company");
+      socket.off(
+        "employee:location:update"
+      );
+      socket.off("connect_error");
+      socket.off("disconnect");
+
+      socket.disconnect();
+    };
+
+  }, [user?.companyId, SOCKET_URL]);
+
+  // =====================================================
+  // REST OF YOUR DASHBOARD
+  // =====================================================
 
   const statCards = [
     {

@@ -32,11 +32,26 @@ const io = new Server(httpServer, {
 // SOCKET CONNECTION
 // ==========================================
 io.on("connection", (socket) => {
-  console.log("Socket connected:", socket.id);
 
-  socket.on("disconnect", () => {
-    console.log("Socket disconnected:", socket.id);
+  console.log("🔌 SOCKET CONNECTED:", socket.id);
+
+  socket.on("join-company", (companyId) => {
+
+    const roomName = `company:${companyId}`;
+
+    socket.join(roomName);
+
+    console.log(
+      "🏢 SOCKET JOINED ROOM:",
+      socket.id,
+      roomName
+    );
+
+    socket.emit("joined-company", {
+      room: roomName,
+    });
   });
+
 });
 
 // ==========================================
