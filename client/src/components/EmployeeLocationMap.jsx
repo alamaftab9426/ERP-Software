@@ -174,10 +174,6 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
       );
   };
 
-  // ==========================================
-  // CLEANUP GPS WATCHER
-  // ==========================================
-
   useEffect(() => {
     return () => {
       if (watchIdRef.current !== null) {
@@ -190,16 +186,10 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
     };
   }, []);
 
-  // ==========================================
-  // UI
-  // ==========================================
-
   return (
     <div className="rounded-lg overflow-hidden border border-slate-200">
 
-      {/* =====================================
-          LOCATION NOT ENABLED
-      ====================================== */}
+      {/* ===========LOCATION NOT ENABLED============== */}
 
       {!location && (
         <div className="h-72 bg-slate-50 flex flex-col items-center justify-center">
@@ -224,9 +214,7 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
         </div>
       )}
 
-      {/* =====================================
-          LOCATION AVAILABLE
-      ====================================== */}
+      {/* ===========LOCATION AVAILABLE============== */}
 
       {location && (
         <div className="relative">
