@@ -163,9 +163,7 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
           setIsTracking(false);
         },
 
-        // ======================================
-        // GPS OPTIONS
-        // ======================================
+        // GPS OPTIONs
         {
           enableHighAccuracy: true,
           maximumAge: 5000,
