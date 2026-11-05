@@ -2,21 +2,11 @@ import LocationHistory from "../models/LocationHistory.js";
 import Employee from "../models/Employee.js";
 import { io } from "../server.js";
 
-// ======================================================
-// 1. CREATE LOCATION HISTORY
+
 // Employee GPS location save + Admin real-time update
-// ======================================================
-
 export const createLocationHistory = async (req, res) => {
-  console.log("========================================");
-  console.log("🔥 LOCATION CONTROLLER HIT");
-  console.log("========================================");
-
   try {
-    // ==================================================
-    // 1. REQUEST DATA
-    // ==================================================
-
+      // 1 REQUEST DATA
     const {
       latitude,
       longitude,
@@ -26,25 +16,9 @@ export const createLocationHistory = async (req, res) => {
       timestamp,
     } = req.body;
 
-    console.log("📦 LOCATION REQUEST BODY:", {
-      latitude,
-      longitude,
-      accuracy,
-      speed,
-      heading,
-      timestamp,
-    });
-
-    console.log("👤 USER ID:", req.user?._id);
-    console.log("🏢 COMPANY ID:", req.user?.companyId);
-
-    // ==================================================
     // 2. AUTH CHECK
-    // ==================================================
-
     if (!req.user || !req.user._id) {
-      console.log("❌ USER NOT FOUND IN REQUEST");
-
+      console.log("USER NOT FOUND IN REQUEST");
       return res.status(401).json({
         success: false,
         message:
@@ -53,7 +27,7 @@ export const createLocationHistory = async (req, res) => {
     }
 
     if (!req.user.companyId) {
-      console.log("❌ COMPANY ID NOT FOUND");
+      console.log("COMPANY ID NOT FOUND");
 
       return res.status(401).json({
         success: false,
@@ -62,19 +36,12 @@ export const createLocationHistory = async (req, res) => {
       });
     }
 
-    // ==================================================
     // 3. REQUIRED GPS DATA
-    // ==================================================
-
     if (
       latitude == null ||
       longitude == null ||
       timestamp == null
     ) {
-      console.log(
-        "❌ REQUIRED LOCATION DATA MISSING"
-      );
-
       return res.status(400).json({
         success: false,
         message:
@@ -82,24 +49,13 @@ export const createLocationHistory = async (req, res) => {
       });
     }
 
-    // ==================================================
     // 4. GPS COORDINATE VALIDATION
-    // ==================================================
-
     if (
       latitude < -90 ||
       latitude > 90 ||
       longitude < -180 ||
       longitude > 180
     ) {
-      console.log(
-        "❌ INVALID GPS COORDINATES:",
-        {
-          latitude,
-          longitude,
-        }
-      );
-
       return res.status(400).json({
         success: false,
         message:
@@ -107,10 +63,7 @@ export const createLocationHistory = async (req, res) => {
       });
     }
 
-    // ==================================================
     // 5. TIMESTAMP VALIDATION
-    // ==================================================
-
     const locationTimestamp =
       new Date(timestamp);
 
@@ -120,7 +73,7 @@ export const createLocationHistory = async (req, res) => {
       )
     ) {
       console.log(
-        "❌ INVALID TIMESTAMP:",
+        "INVALID TIMESTAMP:",
         timestamp
       );
 
@@ -129,15 +82,7 @@ export const createLocationHistory = async (req, res) => {
         message: "Invalid timestamp.",
       });
     }
-
-    // ==================================================
     // 6. FIND EMPLOYEE
-    // ==================================================
-
-    console.log(
-      "🔎 FINDING EMPLOYEE..."
-    );
-
     const employee =
       await Employee.findOne({
         userId: req.user._id,
@@ -147,7 +92,7 @@ export const createLocationHistory = async (req, res) => {
 
     if (!employee) {
       console.log(
-        "❌ EMPLOYEE PROFILE NOT FOUND"
+        "EMPLOYEE PROFILE NOT FOUND"
       );
 
       return res.status(404).json({
@@ -156,44 +101,21 @@ export const createLocationHistory = async (req, res) => {
           "Employee profile not found.",
       });
     }
-
-    console.log(
-      "✅ EMPLOYEE FOUND:",
-      {
-        employeeId:
-          employee._id.toString(),
-
-        employeeCode:
-          employee.employeeCode,
-
-        companyId:
-          employee.companyId.toString(),
-      }
-    );
-
-    // ==================================================
     // 7. SAVE LOCATION TO MONGODB
-    // ==================================================
-
     const newLocation =
       await LocationHistory.create({
         companyId:
           employee.companyId,
-
         employeeId:
           employee._id,
-
         userId:
           employee.userId,
-
         latitude,
         longitude,
-
         accuracy:
           accuracy != null
             ? accuracy
             : null,
-
         speed:
           speed != null
             ? speed
@@ -206,33 +128,8 @@ export const createLocationHistory = async (req, res) => {
 
         timestamp:
           locationTimestamp,
-      });
-
-    console.log(
-      "✅ LOCATION SAVED TO DATABASE"
-    );
-
-    console.log({
-      locationId:
-        newLocation._id.toString(),
-
-      employeeId:
-        employee._id.toString(),
-
-      latitude:
-        newLocation.latitude,
-
-      longitude:
-        newLocation.longitude,
-
-      timestamp:
-        newLocation.timestamp,
-    });
-
-    // ==================================================
+      });  
     // 8. CREATE SOCKET ROOM
-    // ==================================================
-
     const companyId =
       employee.companyId.toString();
 
@@ -244,56 +141,30 @@ export const createLocationHistory = async (req, res) => {
 
     const roomName =
       `company:${companyId}`;
-
-    console.log(
-      "🏢 SOCKET ROOM:",
-      roomName
-    );
-
-    // ==================================================
     // 9. SOCKET PAYLOAD
-    // ==================================================
-
     const locationPayload = {
+
       employeeId,
       userId,
-
       employeeCode:
         employee.employeeCode,
-
       designation:
         employee.designation,
-
       latitude:
         newLocation.latitude,
-
       longitude:
         newLocation.longitude,
-
       accuracy:
         newLocation.accuracy,
-
       speed:
         newLocation.speed,
-
       heading:
         newLocation.heading,
-
       timestamp:
         newLocation.timestamp,
     };
-
-    console.log(
-      "📡 SOCKET PAYLOAD:",
-      locationPayload
-    );
-
-    // ==================================================
     // 10. CHECK ADMIN SOCKETS IN COMPANY ROOM
-    // ==================================================
-
     let socketsInRoom = [];
-
     try {
       const roomSockets =
         await io
@@ -304,62 +175,22 @@ export const createLocationHistory = async (req, res) => {
         roomSockets.map(
           (socket) => socket.id
         );
-
-      console.log(
-        "👥 SOCKETS IN COMPANY ROOM:",
-        roomName
-      );
-
-      console.log(
-        socketsInRoom
-      );
-
-      console.log(
-        "👥 SOCKET COUNT:",
-        socketsInRoom.length
-      );
+     ;
     } catch (socketCheckError) {
       console.error(
-        "❌ SOCKET ROOM CHECK ERROR:",
+        " SOCKET ROOM CHECK ERROR:",
         socketCheckError
       );
     }
 
-    // ==================================================
     // 11. EMIT REAL-TIME LOCATION
-    // ==================================================
-
-    console.log(
-      "🚀 EMITTING LOCATION UPDATE..."
-    );
 
     io.to(roomName).emit(
       "employee:location:update",
       locationPayload
     );
-
-    console.log(
-      "✅ LOCATION EMITTED SUCCESSFULLY"
-    );
-
-    console.log(
-      "ROOM:",
-      roomName
-    );
-
-    console.log(
-      "EVENT:",
-      "employee:location:update"
-    );
-
-    console.log(
-      "========================================"
-    );
-
-    // ==================================================
+  
     // 12. RESPONSE
-    // ==================================================
-
     return res.status(201).json({
       success: true,
       message:
@@ -370,21 +201,7 @@ export const createLocationHistory = async (req, res) => {
 
   } catch (error) {
 
-    console.error(
-      "========================================"
-    );
-
-    console.error(
-      "❌ LOCATION CONTROLLER ERROR"
-    );
-
-    console.error(
-      error
-    );
-
-    console.error(
-      "========================================"
-    );
+    console.error(error);
 
     return res.status(500).json({
       success: false,
@@ -393,12 +210,10 @@ export const createLocationHistory = async (req, res) => {
     });
   }
 };
-export const getEmployeeHistory = async (
-  req,
-  res
-) => {
-  try {
 
+export const getEmployeeHistory = async (req,res) => {
+
+  try {
     const { employeeId } =
       req.params;
 
@@ -419,15 +234,11 @@ export const getEmployeeHistory = async (
       employeeId,
     };
 
-    // ================================================
     // DATE FILTER
-    // ================================================
-
     if (startDate && endDate) {
 
       const start =
         new Date(startDate);
-
       const end =
         new Date(endDate);
 
@@ -452,10 +263,7 @@ export const getEmployeeHistory = async (
       };
     }
 
-    // ================================================
     // FETCH HISTORY
-    // ================================================
-
     const history =
       await LocationHistory.find(
         filter
@@ -474,7 +282,7 @@ export const getEmployeeHistory = async (
   } catch (error) {
 
     console.error(
-      "❌ Error fetching location history:",
+      "Error fetching location history:",
       error
     );
 
@@ -485,12 +293,10 @@ export const getEmployeeHistory = async (
     });
   }
 };
-export const getLatestLocation = async (
-  req,
-  res
-) => {
-  try {
 
+export const getLatestLocation = async (req,res) => {
+
+  try {
     const { employeeId } =
       req.params;
 
@@ -502,10 +308,7 @@ export const getLatestLocation = async (
       });
     }
 
-    const latestLocation =
-      await LocationHistory.findOne({
-        employeeId,
-      })
+    const latestLocation =await LocationHistory.findOne({employeeId,})
         .sort({
           timestamp: -1,
         })
@@ -515,7 +318,7 @@ export const getLatestLocation = async (
       return res.status(404).json({
         success: false,
         message:
-          "Is employee ki koi location history nahi mili.",
+          "Particluar Employee Did Not Getting Location",
       });
     }
 
@@ -527,7 +330,7 @@ export const getLatestLocation = async (
   } catch (error) {
 
     console.error(
-      "❌ Error fetching latest location:",
+      "Error fetching latest location:",
       error
     );
 
@@ -538,23 +341,17 @@ export const getLatestLocation = async (
     });
   }
 };
-export const getCompanyLatestLocations = async (
-  req,
-  res
-) => {
+
+export const getCompanyLatestLocations = async (req, res) => {
   try {
 
     const companyId =
       req.user.companyId;
 
-    // ================================================
     // COMPANY CHECK
-    // ================================================
-
     if (!companyId) {
-
       console.log(
-        "❌ COMPANY ID NOT FOUND"
+        "COMPANY ID NOT FOUND"
       );
 
       return res.status(400).json({
@@ -564,21 +361,12 @@ export const getCompanyLatestLocations = async (
       });
     }
 
-    console.log(
-      "🏢 GET COMPANY LATEST LOCATIONS:",
-      companyId
-    );
-
-    // ================================================
     // GET ACTIVE EMPLOYEES
-    // ================================================
 
     const employees =
       await Employee.find({
         companyId,
-
         status: "ACTIVE",
-
         isDeleted: false,
       })
         .select(
@@ -595,10 +383,7 @@ export const getCompanyLatestLocations = async (
       employees.length
     );
 
-    // ================================================
     // GET LATEST LOCATION
-    // ================================================
-
     const locations =
       await Promise.all(
         employees.map(
@@ -666,7 +451,7 @@ export const getCompanyLatestLocations = async (
       );
 
     console.log(
-      "📍 COMPANY LOCATION DATA READY:",
+      "COMPANY LOCATION DATA READY:",
       locations.length
     );
 
@@ -683,7 +468,7 @@ export const getCompanyLatestLocations = async (
   } catch (error) {
 
     console.error(
-      "❌ Error fetching company locations:",
+      "Error fetching company locations:",
       error
     );
 
