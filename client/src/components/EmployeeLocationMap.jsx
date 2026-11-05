@@ -75,9 +75,6 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
 
       return;
     }
-
-    // Agar pehle se watcher chal raha hai
-    // to duplicate watcher mat banao
     if (watchIdRef.current !== null) {
       return;
     }
@@ -86,9 +83,7 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
 
     watchIdRef.current =
       navigator.geolocation.watchPosition(
-        // ======================================
         // SUCCESS
-        // ======================================
         (position) => {
           const {
             latitude,
@@ -124,9 +119,7 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
           }
         },
 
-        // ======================================
         // ERROR
-        // ======================================
         (error) => {
           console.error(
             "GPS Error:",
