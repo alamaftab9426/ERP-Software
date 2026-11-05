@@ -239,7 +239,7 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-
+{/* ssq */}
             <Marker
               position={[
                 location.latitude,
