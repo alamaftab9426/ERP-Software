@@ -272,7 +272,6 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            {/* EMPLOYEE CURRENT LOCATION */}
 
             <Marker
               position={[
