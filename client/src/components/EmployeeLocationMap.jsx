@@ -13,10 +13,7 @@ import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-// ==========================================
 // EMPLOYEE MARKER ICON
-// ==========================================
-
 const employeeMarkerIcon = L.icon({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
@@ -29,10 +26,7 @@ const employeeMarkerIcon = L.icon({
   shadowSize: [41, 41],
 });
 
-// ==========================================
 // KEEP MAP CENTERED ON EMPLOYEE
-// ==========================================
-
 const RecenterMap = ({ latitude, longitude }) => {
   const map = useMap();
 
@@ -48,10 +42,7 @@ const RecenterMap = ({ latitude, longitude }) => {
   return null;
 };
 
-// ==========================================
 // EMPLOYEE LOCATION MAP
-// ==========================================
-
 const EmployeeLocationMap = ({ onLocationUpdate }) => {
   const [location, setLocation] = useState(null);
 
@@ -63,10 +54,7 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
 
   const watchIdRef = useRef(null);
 
-  // ==========================================
   // START GPS TRACKING
-  // ==========================================
-
   const handleEnableLocation = () => {
     if (!navigator.geolocation) {
       setLocationError(
