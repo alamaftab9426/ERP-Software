@@ -193,7 +193,7 @@ const EmployeeLocationMap = ({ onLocationUpdate }) => {
         </div>
       )}
 
-      {/* ===========LOCATION AVAILABLE============== */}
+      {/* ===========LOCATION AVAILABLE====== */}
 
       {location && (
         <div className="relative">
